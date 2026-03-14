@@ -49,7 +49,7 @@
 <body>
 
 <div class="login-box">
-    <h2>Reloader Games</h2>
+    <h2>Reloader</h2>
 
     <form action="login" method="post">
         <label>Usuario</label>

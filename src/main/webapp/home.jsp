@@ -11,7 +11,7 @@
 <html>
 <head>
     <meta charset="UTF-8">
-    <title>Reloader Games - Home</title>
+    <title>Reloader - Home</title>
     <style>
         body {
             font-family: Arial, sans-serif;
@@ -47,7 +47,7 @@
 <body>
 
 <div class="header">
-    <h2>Reloader Games</h2>
+    <h2>Reloader</h2>
     <div>
         Usuario: <strong><%= user %></strong>
         &nbsp;&nbsp;
@@ -57,7 +57,7 @@
 
 <div class="content">
     <h3>Bienvenido al panel principal</h3>
-    <p>Tu sesión está activa y autenticada correctamente.</p>
+    <p>Tu sesión está activa y autenticada correctamente "no me quemes".</p>
 </div>
 
 </body>
