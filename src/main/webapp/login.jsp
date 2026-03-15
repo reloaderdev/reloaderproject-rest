@@ -13,7 +13,26 @@
             justify-content: center;
             align-items: center;
             height: 100vh;
+            margin: 0;
         }
+
+        .top-left-refresh {
+            position: fixed;
+            top: 16px;
+            left: 16px;
+            font-size: 14px;
+            color: rgba(255,255,255,0.85);
+            text-decoration: none;
+            padding: 6px 10px;
+            border-radius: 6px;
+            background: rgba(255,255,255,0.06);
+            border: 1px solid rgba(255,255,255,0.10);
+        }
+
+        .top-left-refresh:hover {
+            background: rgba(255,255,255,0.10);
+        }
+
         .login-box {
             background: #2c2c3e;
             padding: 30px;
@@ -47,6 +66,8 @@
     </style>
 </head>
 <body>
+
+<a class="top-left-refresh" href="<%= request.getContextPath() %>/login.jsp">↻ Volver al login</a>
 
 <div class="login-box">
     <h2>Reloader</h2>
