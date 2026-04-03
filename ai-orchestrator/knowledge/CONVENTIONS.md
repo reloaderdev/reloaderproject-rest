@@ -1,7 +1,7 @@
 # Conventions
 
 ## Commits
-- Firma obligatoria: `Authored-By: Reloader - Resembrink Correa`
+- Firma obligatoria: `Authored-By: Reloader - Resembrink Correa Egoavil`
 - Nunca usar `Co-Authored-By: Claude Sonnet 4.6` ni variantes
 - No hacer commit ni push automáticamente — solo cuando se pide explícitamente
 - Los mensajes de commit siempre en español
