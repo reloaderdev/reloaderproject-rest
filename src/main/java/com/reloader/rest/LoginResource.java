@@ -21,11 +21,7 @@ public class LoginResource {
             String username = json.getString("username");
             String password = json.getString("password");
 
-            int isAuthenticated = service.login(username, password);
-
-            JSONObject response = new JSONObject();
-            response.put("isAuthenticated", isAuthenticated);
-
+            JSONObject response = service.login(username, password);
             return Response.ok(response.toString()).build();
 
         } catch (Exception e) {

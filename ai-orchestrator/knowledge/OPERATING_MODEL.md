@@ -2,35 +2,97 @@
 
 ## Fuente de verdad
 
-- La única fuente de verdad de la arquitectura de automatización es `ai-orchestrator/`
-- El código fuente del proyecto es la fuente de verdad funcional
-- Todo debe persistirse en: `knowledge/` (reglas estables), `domains/` (por tecnología), `flows/` (procesos), `skills/` (automatización)
-- Prohibido usar memoria interna de Claude como fuente de verdad
-- Prohibido duplicar información entre archivos
-- Si hay algo que recordar → escribirlo en el `.md` correspondiente dentro del proyecto
+- La unica fuente de verdad de la arquitectura de automatizacion es `ai-orchestrator/`
+- El codigo fuente del proyecto es la fuente de verdad funcional
+- Todo debe persistirse en:
+  - `knowledge/` para reglas estables
+  - `domains/` para tecnologia
+  - `flows/` para procesos
+  - `skills/` para automatizacion
+- No depender de memoria conversacional como fuente unica
 
-## Ejecución
+## Ejecucion
 
-- Claude no debe ejecutar procesos pesados (mvn, docker build, docker run)
-- Solo debe preparar comandos, validaciones y pasos
-- El usuario ejecuta manualmente o vía pipeline
-- El pipeline de GitHub Actions se dispara automáticamente con push a `main`
+- Preferir cambios pequenos, verificables y documentados
+- El despliegue normal puede ser automatico o manual
+- Cuando algo deba recordarse para la siguiente jornada, dejarlo en `knowledge/`
 
-## Deploy automático
+## GitHub Actions actual
 
-Basta con hacer `git push origin main`. El pipeline hace:
-1. `mvn clean package` → genera `reloaderproject.war`
-2. `docker build` → imagen tagueada con el run number
-3. `docker push` → sube a Azure Container Registry (`reloaderprodacr.azurecr.io`)
-4. Deploy a Azure Web App
+Se separo el pipeline en dos workflows:
 
-Secrets requeridos en GitHub: `AZURE_CREDENTIALS`, `ACR_USERNAME`, `ACR_PASSWORD`
+- `build.yml`
+- `deploy.yml`
 
-## Reglas de interacción
+### Build
 
-1. Proponer estructura antes de crear archivos o carpetas — no crear sin aprobación
-2. Respetar el estilo del usuario (naming, validaciones, patrones)
-3. Explicaciones directas al punto — sin relleno
-4. Respetar el patrón existente de cada módulo — no cambiarlo sin que se pida
-5. No modificar código funcional sin pedido explícito
-6. Comunicarse siempre en español; el código en el idioma original
+Corre en:
+
+- `push` a `main`
+- `pull_request`
+
+Hace solo validacion:
+
+1. checkout
+2. setup Java 17
+3. `mvn clean package`
+
+### Deploy
+
+Corre solo cuando se empuja un tag:
+
+- `deploy-*`
+
+Ejemplo:
+
+```bash
+git tag deploy-1.0.16
+git push origin deploy-1.0.16
+```
+
+Eso si hace:
+
+1. build WAR
+2. build Docker
+3. push a ACR
+4. deploy a Azure
+
+Secrets requeridos en GitHub:
+
+- `AZURE_CREDENTIALS`
+- `ACR_USERNAME`
+- `ACR_PASSWORD`
+- `ACR_LOGIN_SERVER`
+- `AZURE_WEBAPP_NAME`
+
+## Deploy manual validado
+
+Tambien existe flujo manual validado:
+
+1. `mvn clean package`
+2. `docker build`
+3. `docker push` al ACR
+4. actualizar imagen del App Service
+5. reiniciar el Web App si hace falta
+
+Version validada en esta jornada:
+
+- `reloaderprodacr.azurecr.io/reloader-backend:1.0.15`
+
+Base actual del backend:
+
+- `reloader-games-db`
+
+## Reglas de interaccion
+
+1. Explicaciones directas al punto
+2. Respetar el estilo del usuario
+3. No cambiar patrones sin justificarlo
+4. Documentar decisiones importantes en el orquestador
+
+## Referencia de seguimiento
+
+Para retomar manana:
+
+- `knowledge/STATUS_2026-04-03.md`
+- `flows/deploy.md`

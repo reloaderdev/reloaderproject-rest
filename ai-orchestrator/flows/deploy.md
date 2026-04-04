@@ -1,50 +1,94 @@
 # Flow: Deploy a Azure
 
-## Deploy automático (modo normal)
+## Estrategia actual
 
-El deploy a producción se hace con solo:
+El proyecto usa dos workflows separados:
+
+- `build.yml`
+- `deploy.yml`
+
+## Build (sin deploy)
+
+`build.yml` corre en:
+
+- `push` a `main`
+- `pull_request`
+
+Hace:
+
+1. checkout
+2. setup Java 17
+3. `mvn clean package`
+
+No hace:
+
+- docker push
+- deploy a Azure
+
+## Deploy (solo cuando se decide)
+
+`deploy.yml` corre solo con tags:
+
+- `deploy-*`
+
+Ejemplo:
 
 ```bash
-git add {archivos}
-git commit -m "mensaje"
-git push origin main
+git tag deploy-1.0.16
+git push origin deploy-1.0.16
 ```
 
-GitHub Actions hace el resto automáticamente:
-1. Build WAR (`mvn clean package`)
-2. Build Docker image
-3. Push a ACR (`reloaderprodacr.azurecr.io/reloader-backend:1.0.<run_number>`)
-4. Deploy a Azure Web App
+Eso dispara:
 
-## Verificar que el deploy funcionó
+1. checkout
+2. setup Java 17
+3. `mvn clean package`
+4. login a ACR
+5. build Docker
+6. push al ACR
+7. deploy a Azure Web App
 
-1. Ir a GitHub → Actions → ver el workflow corriendo
-2. Esperar que aparezca en verde
-3. Hacer `GET /health` en la URL del Web App → debe responder `200 OK`
+## Beneficio de este modelo
 
-## Secrets necesarios en GitHub
+- se puede hacer push frecuente sin tocar Azure
+- se puede trabajar por ramas
+- se pueden hacer PRs y squash merge
+- Azure solo se actualiza cuando el equipo decide publicar
 
-Si el pipeline falla por autenticación, verificar que estos secrets existen en el repo:
+## Flujo recomendado
+
+### Trabajo diario
+
+```bash
+git add .
+git commit -m "feat: cambio normal"
+git push origin mi-rama
+```
+
+o merge a `main` cuando ya corresponde.
+
+Eso solo valida build.
+
+### Publicacion
+
+```bash
+git checkout main
+git pull
+git tag deploy-1.0.16
+git push origin deploy-1.0.16
+```
+
+Eso si despliega a Azure.
+
+## Secrets necesarios
+
 - `AZURE_CREDENTIALS`
 - `ACR_USERNAME`
 - `ACR_PASSWORD`
+- `ACR_LOGIN_SERVER`
+- `AZURE_WEBAPP_NAME`
 
-## Build local (solo para verificar que compila)
+## Referencia de seguimiento
 
-```bash
-cd reloaderproject-rest
-mvn clean package
-```
-
-Output esperado: `BUILD SUCCESS` y `target/reloaderproject.war`
-
-**Claude no ejecuta estos comandos.** Solo los prepara para que el usuario los ejecute.
-
-## Troubleshooting
-
-| Problema | Acción |
-|---|---|
-| Pipeline falla en docker login | Verificar secrets ACR_USERNAME / ACR_PASSWORD |
-| App no levanta en Azure | Ver logs en Azure Web App → Log stream |
-| Health check falla | Verificar que HealthServlet responde en /health |
-| WAR no se despliega en Payara | Verificar path en Dockerfile: `/opt/payara/appserver/glassfish/domains/domain1/autodeploy/` |
+- `knowledge/OPERATING_MODEL.md`
+- `knowledge/STATUS_2026-04-03.md`

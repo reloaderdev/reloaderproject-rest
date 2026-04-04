@@ -1,85 +1,84 @@
 # Architecture
 
-## Patrón general
-Arquitectura de 3 capas: REST Resource → Service → DAO → DatabaseConnection
+## Patron general
+
+Arquitectura de 3 capas:
+
+`REST Resource -> Service -> DAO -> DatabaseConnection`
 
 ## Stack
-- Runtime: Payara 6 (Jakarta EE 10), Java 17
-- REST: JAX-RS 3.1 (`jakarta.ws.rs`)
-- DB: Azure SQL Server via JDBC (`mssql-jdbc 12.6.1`)
+
+- Runtime: Payara 6 / Jakarta EE 10
+- Java 17
+- REST: JAX-RS
+- DB: Azure SQL Server via JDBC
 - JSON: `org.json`
-- Build: Maven, WAR packaging
-- Deploy: Docker → Azure Container Registry → Azure Web App
+- Build: Maven WAR
+- Deploy: Docker -> Azure Container Registry -> Azure Web App
 
 ## Capas
 
-### `com.reloader.rest.*` — REST Resources (JAX-RS)
-- Recibe el JSON del cliente como `String`
-- Parsea con `JSONObject`
-- Llama al Service
-- Devuelve `Response` con JSON string
-- Anotaciones: `@Path`, `@POST`, `@GET`, `@Consumes`, `@Produces`
+### `com.reloader.rest.*`
 
-### `com.reloader.services.*` — Services
-- Lógica de negocio e intermediario entre Resource y DAO
-- Instancia directa del DAO concreto (`new XxxSqlServerDAO()`)
-- No conoce JAX-RS ni HTTP
+- endpoints REST
+- reciben JSON
+- llaman al service
+- devuelven JSON
 
-### `com.reloader.dao.*` — Interfaces DAO
-- Define el contrato de acceso a datos
-- Sin implementación, solo firmas de método
+### `com.reloader.services.*`
 
-### `com.reloader.sqlserverdao.*` — Implementaciones SQL Server
-- Implementa la interface DAO
-- Usa `DatabaseConnection.getConnection()`
-- Ejecuta stored procedures via `CallableStatement`
-- Parsea `ResultSet` a `JSONObject` / `JSONArray`
+- logica de negocio
+- orquestacion entre resource y DAO
 
-### `com.reloader.auth.*` — NO TOCAR
-- `DatabaseConnection.java` → fuente de conexión, lee env vars `DB_URL`, `DB_USER`, `DB_PASSWORD`
-- `LoginServlet.java` → servlet de login web (form POST → JSP)
+### `com.reloader.dao.*`
 
-### `com.reloader.health.*` — NO TOCAR
-- `HealthServlet.java` → responde `200 OK` en `GET /health` para Azure health probes
+- contratos DAO
 
-## Flujo de request REST
+### `com.reloader.sqlserverdao.*`
 
-```
-POST /reloaderproject/webresources/{path}
-        ↓
-XxxResource (@Path, @POST, consume/produce JSON)
-        ↓
-XxxService (instancia DAO, orquesta)
-        ↓
-XxxDAO (interface) → XxxSqlServerDAO (stored procedure)
-        ↓
-DatabaseConnection.getConnection() → Azure SQL Server
-```
+- implementaciones SQL Server
+- ejecutan stored procedures
+- transforman result sets a JSON
 
-## ApplicationConfig
+### `com.reloader.auth.*`
 
-```java
-@ApplicationPath("webresources")
-public class ApplicationConfig extends Application { }
-```
+- `DatabaseConnection.java`
+- `LoginServlet.java`
 
-Un único `ApplicationConfig` registra todos los recursos JAX-RS automáticamente.
+### `com.reloader.health.*`
 
-## Convención de paquetes
+- health check del Web App
 
-```
-com.reloader
-├── rest/           → ApplicationConfig + Resources JAX-RS
-├── services/       → Services (lógica de negocio)
-├── dao/            → Interfaces DAO
-├── sqlserverdao/   → Implementaciones SQL Server
-├── auth/           → DatabaseConnection, LoginServlet (no tocar)
-└── health/         → HealthServlet (no tocar)
-```
+## Flujo actual de login
 
-## Principios obligatorios
-- Un Resource por dominio (LoginResource, UsuarioResource, etc.)
-- Un Service por Resource
-- Un DAO interface + un SqlServerDAO por Service
-- No mezclar lógica de negocio en el Resource
-- No mezclar acceso a datos en el Service
+1. `POST /webresources/auth/login`
+2. `LoginResource`
+3. `LoginService`
+4. `LoginSqlServerDAO`
+5. `auth.sp_LoginUser`
+6. `core.sp_GetPrimaryCharacterContext`
+
+Resultado esperado:
+
+- `isAuthenticated`
+- `user`
+- `character` cuando exista
+- `guild` cuando exista
+- `equipment`, `sockets`, `baseStats`, `assignedStats`, `finalStats`
+
+## Estado actual relevante
+
+- el backend ya autentica contra `reloader-games-db`
+- `auth.sp_LoginUser` devuelve la sesion base del usuario
+- `core.sp_GetPrimaryCharacterContext` devuelve el contexto del personaje
+- el login web y REST ya estan remodelados para esta base nueva
+
+## Escalado futuro
+
+La estrategia de crecimiento esta documentada en:
+
+- `knowledge/SCALING_MODEL.md`
+
+El estado puntual de esta jornada esta documentado en:
+
+- `knowledge/STATUS_2026-04-03.md`

@@ -1,13 +1,20 @@
 package com.reloader.auth;
 
-import java.io.IOException;
-import java.sql.*;
+import com.reloader.services.LoginService;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.annotation.WebServlet;
-import jakarta.servlet.http.*;
+import jakarta.servlet.http.HttpServlet;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
+import jakarta.servlet.http.HttpSession;
+import org.json.JSONObject;
+
+import java.io.IOException;
 
 @WebServlet("/login")
 public class LoginServlet extends HttpServlet {
+
+    private final LoginService service = new LoginService();
 
     @Override
     protected void doPost(HttpServletRequest request, HttpServletResponse response)
@@ -16,24 +23,28 @@ public class LoginServlet extends HttpServlet {
         String username = request.getParameter("username");
         String password = request.getParameter("password");
 
-        try (Connection conn = DatabaseConnection.getConnection()) {
+        try {
+            JSONObject loginResponse = service.login(username, password);
+            int isAuthenticated = loginResponse.optInt("isAuthenticated", 0);
 
-            CallableStatement stmt = conn.prepareCall("{call auth.sp_LoginUser(?, ?)}");
-            stmt.setString(1, username);
-            stmt.setString(2, password);
+            if (isAuthenticated == 1) {
+                HttpSession session = request.getSession();
 
-            ResultSet rs = stmt.executeQuery();
+                JSONObject user = loginResponse.optJSONObject("user");
+                JSONObject character = loginResponse.optJSONObject("character");
+                JSONObject guild = loginResponse.optJSONObject("guild");
 
-            if (rs.next()) {
-                int isAuthenticated = rs.getInt("IsAuthenticated");
+                session.setAttribute("username", user != null ? user.optString("username", username) : username);
+                session.setAttribute("displayName", user != null ? user.optString("displayName", "") : "");
+                session.setAttribute("email", user != null ? user.optString("email", "") : "");
+                session.setAttribute("role", user != null ? user.optString("role", "") : "");
+                session.setAttribute("photoUrl", user != null ? user.optString("photoUrl", "") : "");
+                session.setAttribute("characterName", character != null ? character.optString("characterName", "") : "");
+                session.setAttribute("className", character != null ? character.optString("className", "") : "");
+                session.setAttribute("factionName", character != null ? character.optString("factionName", "") : "");
+                session.setAttribute("guildName", guild != null ? guild.optString("guildName", "") : "");
 
-                if (isAuthenticated == 1) {
-                    HttpSession session = request.getSession();
-                    session.setAttribute("username", username);
-                    response.sendRedirect("home.jsp");
-                } else {
-                    response.sendRedirect("login.jsp?error=true");
-                }
+                response.sendRedirect("home.jsp");
             } else {
                 response.sendRedirect("login.jsp?error=true");
             }

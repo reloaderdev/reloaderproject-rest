@@ -1,152 +1,46 @@
 # Conventions
 
-## Commits
-- Firma obligatoria: `Authored-By: Reloader - Resembrink Correa Egoavil`
-- Nunca usar `Co-Authored-By: Claude Sonnet 4.6` ni variantes
-- No hacer commit ni push automáticamente — solo cuando se pide explícitamente
-- Los mensajes de commit siempre en español
-
-### Estructura de commit message
-
-```
-tipo: descripción corta del cambio
-
-- archivo o módulo: qué se hizo y por qué
-- archivo o módulo: qué se hizo y por qué
-
-Authored-By: Reloader - Resembrink Correa
-```
-
-Ejemplo:
-```
-feat: agrega endpoint REST de login
-
-- LoginResource.java: resource JAX-RS POST /webresources/auth/login
-- LoginService.java: intermediario entre resource y DAO
-- LoginDAO.java: interface de acceso a datos
-- LoginSqlServerDAO.java: ejecuta sp_LoginUser via CallableStatement
-
-Authored-By: Reloader - Resembrink Correa
-```
-
 ## Git
-- Nunca hacer merge, push directo ni ninguna operación sobre main sin instrucción explícita
-- Push a main dispara el pipeline de GitHub Actions automáticamente
 
-## Naming
+- no hacer commit ni push automatico sin pedido explicito
+- no tocar `main` sin instruccion del usuario
+
+## Naming Java
 
 ### Clases
-| Capa | Convención | Ejemplo |
-|---|---|---|
-| Resource | `XxxResource` | `LoginResource` |
-| Service | `XxxService` | `LoginService` |
-| DAO interface | `XxxDAO` | `LoginDAO` |
-| DAO implementación | `XxxSqlServerDAO` | `LoginSqlServerDAO` |
+
+- Resource: `XxxResource`
+- Service: `XxxService`
+- DAO interface: `XxxDAO`
+- DAO SQL Server: `XxxSqlServerDAO`
 
 ### Endpoints REST
-- Base path: `/webresources/{dominio}/{accion}`
-- Ejemplo: `POST /webresources/auth/login`
 
-### JSON (org.json)
-- Parsear request: `new JSONObject(body)`
-- Construir response: `new JSONObject()` + `.put("key", value)`
-- Devolver como String: `jsonObject.toString()`
+- base: `/webresources/{dominio}/{accion}`
+- ejemplo: `POST /webresources/auth/login`
 
-## Código
+## JSON
 
-### Resource — patrón estándar
-```java
-@Path("dominio")
-public class XxxResource {
+- parsear request con `new JSONObject(body)`
+- construir response con `JSONObject` y `JSONArray`
+- devolver `toString()`
 
-    private final XxxService service = new XxxService();
+## Login
 
-    @POST
-    @Path("accion")
-    @Consumes(MediaType.APPLICATION_JSON)
-    @Produces(MediaType.APPLICATION_JSON)
-    public Response metodo(String body) {
-        try {
-            JSONObject json = new JSONObject(body);
-            // extraer campos
-            // llamar service
-            JSONObject response = new JSONObject();
-            response.put("key", value);
-            return Response.ok(response.toString()).build();
-        } catch (Exception e) {
-            e.printStackTrace();
-            JSONObject error = new JSONObject();
-            error.put("error", e.getMessage());
-            return Response.status(Response.Status.INTERNAL_SERVER_ERROR)
-                    .entity(error.toString()).build();
-        }
-    }
-}
-```
+- el login no debe quedarse solo en `isAuthenticated`
+- debe devolver al menos la sesion base del usuario
+- el contexto del personaje puede venir:
+  - dentro del mismo login
+  - o en un endpoint separado si el payload crece demasiado
 
-### DAO interface — patrón estándar
-```java
-public interface XxxDAO {
-    TipoRetorno metodo(parametros) throws Exception;
-}
-```
+## Stored procedures
 
-### SqlServerDAO — patrón estándar
-```java
-public class XxxSqlServerDAO implements XxxDAO {
-    @Override
-    public TipoRetorno metodo(parametros) throws Exception {
-        try (Connection conn = DatabaseConnection.getConnection()) {
-            CallableStatement stmt = conn.prepareCall("{call schema.sp_Nombre(?, ?)}");
-            stmt.setString(1, param1);
-            stmt.setString(2, param2);
-            ResultSet rs = stmt.executeQuery();
-            // procesar rs
-        }
-    }
-}
-```
+- SP separado por defecto
+- usar `@CONDICION` solo cuando realmente aporte
+- agrupar por schema de dominio
 
-### Service — patrón estándar
-```java
-public class XxxService {
-    private final XxxSqlServerDAO dao = new XxxSqlServerDAO();
+## Referencia actual
 
-    public TipoRetorno metodo(parametros) throws Exception {
-        return dao.metodo(parametros);
-    }
-}
-```
+Para continuar con el mismo criterio manana:
 
-## pom.xml — dependencias base
-```xml
-<!-- Servlet API — provided por Payara -->
-<dependency>
-    <groupId>jakarta.servlet</groupId>
-    <artifactId>jakarta.servlet-api</artifactId>
-    <version>6.0.0</version>
-    <scope>provided</scope>
-</dependency>
-
-<!-- JAX-RS — provided por Payara -->
-<dependency>
-    <groupId>jakarta.ws.rs</groupId>
-    <artifactId>jakarta.ws.rs-api</artifactId>
-    <version>3.1.0</version>
-    <scope>provided</scope>
-</dependency>
-
-<!-- SQL Server JDBC -->
-<dependency>
-    <groupId>com.microsoft.sqlserver</groupId>
-    <artifactId>mssql-jdbc</artifactId>
-    <version>12.6.1.jre11</version>
-</dependency>
-
-<!-- JSON -->
-<dependency>
-    <groupId>org.json</groupId>
-    <artifactId>json</artifactId>
-    <version>20240303</version>
-</dependency>
-```
+- `knowledge/STATUS_2026-04-03.md`

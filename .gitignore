@@ -9,4 +9,4 @@ target/
 
 # OS
 .DS_Store
-Thumbs.db
+Thumbs.db.claude/settings.local.json

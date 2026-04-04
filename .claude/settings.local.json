@@ -5,7 +5,13 @@
       "Bash(git commit -m ':*)",
       "Bash(git push:*)",
       "Bash(find . -type f -exec wc -l {} +)",
-      "Bash(cp:*)"
+      "Bash(cp:*)",
+      "Bash(docker rm:*)",
+      "Bash(mvn clean:*)",
+      "Bash(docker build:*)",
+      "Bash(docker run:*)",
+      "Bash(docker tag:*)",
+      "Bash(docker push:*)"
     ]
   }
 }
