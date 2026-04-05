@@ -96,3 +96,17 @@ Para retomar manana:
 
 - `knowledge/STATUS_2026-04-03.md`
 - `flows/deploy.md`
+
+## Fases del proyecto
+
+- Fase 1:
+  - base nueva
+  - login
+  - integracion backend
+  - despliegue base
+  - documentacion de arranque
+- Fase 2:
+  - home centrado en personaje
+  - equipamiento
+  - stats
+  - shell visual del portal

@@ -72,6 +72,19 @@ Resultado esperado:
 - `auth.sp_LoginUser` devuelve la sesion base del usuario
 - `core.sp_GetPrimaryCharacterContext` devuelve el contexto del personaje
 - el login web y REST ya estan remodelados para esta base nueva
+- `home.jsp` ya funciona como shell visual inicial del portal con sidebar y area central
+
+## Punto de cierre de Fase 1
+
+La Fase 1 deja lista la base estructural:
+
+- datos
+- autenticacion
+- portal inicial
+- despliegue
+- CI/CD
+
+La siguiente capa natural es la Fase 2, centrada en la experiencia del personaje.
 
 ## Escalado futuro
 

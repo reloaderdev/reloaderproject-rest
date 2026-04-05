@@ -7,6 +7,7 @@ import jakarta.servlet.http.HttpServlet;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.servlet.http.HttpSession;
+import org.json.JSONArray;
 import org.json.JSONObject;
 
 import java.io.IOException;
@@ -42,7 +43,27 @@ public class LoginServlet extends HttpServlet {
                 session.setAttribute("characterName", character != null ? character.optString("characterName", "") : "");
                 session.setAttribute("className", character != null ? character.optString("className", "") : "");
                 session.setAttribute("factionName", character != null ? character.optString("factionName", "") : "");
+                session.setAttribute("characterLevel", character != null ? character.optInt("level", 0) : 0);
+                session.setAttribute("characterTitle", character != null ? character.optString("title", "") : "");
+                session.setAttribute("characterMode", character != null ? character.optString("mode", "") : "");
+                session.setAttribute("characterElement", character != null ? character.optString("element", "") : "");
                 session.setAttribute("guildName", guild != null ? guild.optString("guildName", "") : "");
+                session.setAttribute("guildRankName", guild != null ? guild.optString("rankName", "") : "");
+                session.setAttribute("equipmentJson", loginResponse.optJSONArray("equipment") != null
+                        ? loginResponse.optJSONArray("equipment").toString()
+                        : new JSONArray().toString());
+                session.setAttribute("socketsJson", loginResponse.optJSONArray("sockets") != null
+                        ? loginResponse.optJSONArray("sockets").toString()
+                        : new JSONArray().toString());
+                session.setAttribute("baseStatsJson", loginResponse.optJSONArray("baseStats") != null
+                        ? loginResponse.optJSONArray("baseStats").toString()
+                        : new JSONArray().toString());
+                session.setAttribute("assignedStatsJson", loginResponse.optJSONArray("assignedStats") != null
+                        ? loginResponse.optJSONArray("assignedStats").toString()
+                        : new JSONArray().toString());
+                session.setAttribute("finalStatsJson", loginResponse.optJSONArray("finalStats") != null
+                        ? loginResponse.optJSONArray("finalStats").toString()
+                        : new JSONArray().toString());
 
                 response.sendRedirect("home.jsp");
             } else {

@@ -44,3 +44,9 @@
 Para continuar con el mismo criterio manana:
 
 - `knowledge/STATUS_2026-04-03.md`
+
+## Regla de fases
+
+- cerrar cada fase con documentacion de handoff
+- dejar inventario tecnico antes de abrir la siguiente fase
+- no abrir una fase visual nueva sin preservar el estado funcional anterior
