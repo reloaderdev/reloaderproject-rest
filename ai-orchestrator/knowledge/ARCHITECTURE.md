@@ -58,6 +58,11 @@ Arquitectura de 3 capas:
 5. `auth.sp_LoginUser`
 6. `core.sp_GetPrimaryCharacterContext`
 
+En el paso 5, si el login es exitoso:
+
+- se actualiza `LastLoginAt`
+- se inserta evento en `audit.UserLoginEvent`
+
 Resultado esperado:
 
 - `isAuthenticated`
@@ -70,6 +75,7 @@ Resultado esperado:
 
 - el backend ya autentica contra `reloader-games-db`
 - `auth.sp_LoginUser` devuelve la sesion base del usuario
+- `auth.sp_LoginUser` ya deja rastro de actividad para analitica y segmentacion
 - `core.sp_GetPrimaryCharacterContext` devuelve el contexto del personaje
 - el login web y REST ya estan remodelados para esta base nueva
 - `home.jsp` ya funciona como shell visual inicial del portal con sidebar y area central

@@ -88,6 +88,19 @@ Valor esperado en `DB_URL`:
 jdbc:sqlserver://reloader-sql-server.database.windows.net:1433;database=reloader-games-db;encrypt=true;trustServerCertificate=false;hostNameInCertificate=*.database.windows.net;loginTimeout=30;
 ```
 
+Configuracion de costo vigente para la etapa actual:
+
+- tier `Basic`
+- `5 DTU`
+- `2 GB`
+- backup con redundancia local
+
+Motivo:
+
+- reducir costo mientras el proyecto sigue en desarrollo/demo
+- mantener la misma base, tablas, SPs y endpoints
+- escalar despues solo si la carga real lo requiere
+
 ## Health check
 
 - `GET /health`
